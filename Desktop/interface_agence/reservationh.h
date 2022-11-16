@@ -4,24 +4,24 @@
 #include<QDate>
 #include<QSqlQueryModel>
 #include<QSqlQuery>
+#include<iostream>
 class reservationh
 {
 private :
-    // atributs
     int Id ,prix;
     QString nomPrenom,hebergement;
     QDate checkin,checkout;
 
 public:
     reservationh();
-// constructeur parametré
     reservationh(int,QString,QString,QDate,QDate,int);
     int getId();
+    int getprix();
+
     QString getnomPrenom();
     QString gethebergement();
     QDate getcheckin();
     QDate  getcheckout();
-    int getprix();
 
     void setId(int);
     void setnomPrenom(QString);
@@ -29,12 +29,21 @@ public:
     void setcheckin(QDate);
     void sethebergement(QString);
     void setprix(int);
-    // fonction ajout
+    void creation_pdf();
+
     bool ajouter();
-    // fonction afficher
-    QSqlQueryModel * afficher();
     bool supprimer (int);
     bool modifier(int );
+
+    QSqlQueryModel* alerte();
+    QSqlQueryModel * afficher();
+    QSqlQueryModel * triId();
+    QSqlQueryModel * triN();
+    QSqlQueryModel * triP();
+    QSqlQueryModel * rechercheId(int Id);
+    QSqlQueryModel * rechercheN(QString a);
+
+
 
 };
 
