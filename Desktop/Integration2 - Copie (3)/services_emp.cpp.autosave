@@ -1,0 +1,96 @@
+#include "services_emp.h"
+#include "ui_services_emp.h"
+#include "services.h"
+
+Services_emp::Services_emp(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Services_emp)
+{
+    ui->setupUi(this);
+
+    Services s("", 0);
+    ui->tableViewS->setModel(s.afficher_s());
+}
+
+Services_emp::~Services_emp()
+{
+    delete ui;
+}
+
+void Services_emp::on_ajouterS_clicked()
+{
+    QString nomS=ui->nomS->text();
+    int RTT=ui->rttS->text().toInt();
+
+    Services s(nomS, RTT);
+    bool test_ajout = s.ajouter_s();
+
+    if(test_ajout)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" effectue\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewS->setModel(s.afficher_s());
+
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Erreur: nom service existe déjà! \n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+
+}
+
+void Services_emp::on_supprimerS_clicked()
+{
+    int id=ui->idSinput->text().toInt();
+
+    Services s("",0);
+    bool test_supprimer = s.supprimer_s(id);
+    if(test_supprimer)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" function successfully deleted\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewS->setModel(s.afficher_s());
+         ui->idSinput->setText("");
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Error deleting service: service does not exist\n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+
+}
+
+void Services_emp::on_setS_clicked()
+{
+    int id=ui->idSinput->text().toInt();
+    Services s("", 0);
+
+    QSqlQuery sInfo = s.afficherS(id);
+    sInfo.next();
+    ui->nomS->setText(sInfo.value(1).toString());
+    ui->rttS->setText(sInfo.value(2).toString());
+
+
+}
+
+void Services_emp::on_modifierS_clicked()
+{
+    QString nomS=ui->nomS->text();
+    int RTT=ui->rttS->text().toInt();
+
+    int id=ui->idSinput->text().toInt();
+    Services s(nomS, RTT);
+    bool test_modifier = s.updateS(id);
+
+    if(test_modifier){
+        QMessageBox::information(nullptr, QObject::tr("update status"),QObject::tr("service updated.\nClick Cancel to exit."), QMessageBox::Cancel,QMessageBox::NoIcon);
+        ui->tableViewS->setModel(s.afficher_s());
+        ui->idSinput->setText("");
+    }
+    else {
+        QMessageBox::critical(nullptr, QObject::tr("update status"),QObject::tr("Error updating Service: service does not exist.\nClick Cancel to exit."), QMessageBox::Cancel);
+    }
+
+
+}

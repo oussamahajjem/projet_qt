@@ -1,0 +1,400 @@
+#include "gestion_emp.h"
+#include "ui_gestion_emp.h"
+#include "employes.h"
+#include "fonctions_emp.h"
+#include "services_emp.h"
+#include "salaires_emp.h"
+#include "salaires.h"
+#include "conges_emp.h"
+#include "conges.h"
+#include "login.h"
+
+#include <QPainter>
+#include <qpdfwriter.h>
+#include <QDebug>
+
+Employes currentEmp;
+QString currentId;
+
+Gestion_emp::Gestion_emp(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Gestion_emp)
+{
+    ui->setupUi(this);
+
+    //*******************add trie options**************************
+        ui->trierEmpComboBox->addItem("par défaut");
+        ui->trierEmpComboBox->addItem("nom");
+        ui->trierEmpComboBox->addItem("prenom");
+        ui->trierEmpComboBox->addItem("dateN");
+        ui->trierEmpComboBox->addItem("dateE");
+        ui->trierEmpComboBox->addItem("serviceN");
+        ui->trierEmpComboBox->addItem("fonctionN");
+    //*******************add trie options***************************
+
+
+        //**********************************************
+
+        if(currentEmp.getCurrentFonction() != "admin"){
+                ui->tableViewEmp->hide();
+                ui->chercherEmp->hide();
+                ui->trierEmpBtn->hide();
+                ui->trierEmpComboBox->hide();
+                ui->label_7->hide();
+                ui->supprimerEmp->hide();
+
+                ui->dateE->setDisabled(true);
+                ui->fonctionEmp->setDisabled(true);
+                ui->serviceEmp->setDisabled(true);
+
+                QString id = QString::number(currentEmp.getCurrentId());
+                qDebug()<< "id="<<id;
+                qDebug()<< "currentid="<<currentId;
+
+                ui->idEmpInput->setText(id);
+                ui->idEmpInput->setDisabled(true);
+                ui->ajouterEmp->hide();
+                ui->fonctionEmpBtn->hide();
+                ui->servicesEmpBtn->hide();
+
+                ui->me_fullname->setText(currentEmp.getCurrentPrenom() +" "+ currentEmp.getCurrentNom());
+                ui->me_nom->setText(currentEmp.getCurrentNom());
+                ui->me_prenom->setText(currentEmp.getCurrentPrenom());
+                ui->me_dateN->setText(currentEmp.getCurrentDateN());
+                ui->me_dateE->setText(currentEmp.getCurrentDateE());
+                ui->me_service->setText(currentEmp.getCurrentService());
+                ui->me_fonction->setText(currentEmp.getCurrentFonction());
+                ui->me_email->setText(currentEmp.getCurrentEmail());
+                ui->me_password->setText(currentEmp.getCurrentPassword());
+                ui->me_role->setText(currentEmp.getCurrentFonction());
+            }else {
+                ui->userInterface->hide();
+
+
+            }
+
+        //**********************************************
+
+
+    //set fonction comboBox
+    setFonction_combo();
+
+    setService_combo();
+
+    Employes emp("");
+    ui->tableViewEmp->setModel(emp.afficher_emp());
+}
+
+Gestion_emp::~Gestion_emp()
+{
+    delete ui;
+}
+
+void Gestion_emp::on_ajouterEmp_clicked()
+{
+    QString nomEmp=ui->nomEmp->text();
+    QString prenomEmp=ui->prenomEmp->text();
+    QString email=ui->emailEmp->text();
+    QString password=ui->passwordEmp->text();
+    QString dateN=ui->dateN->text();
+    QString dateE=ui->dateE->text();
+
+    QString fonction=ui->fonctionEmp->currentText();
+    QString service=ui->serviceEmp->currentText();
+
+    Employes emp(nomEmp, prenomEmp, dateN, dateE, service, fonction, email, password);
+    bool test_ajout = emp.ajouter_emp();
+
+    if(test_ajout)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" effectue\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewEmp->setModel(emp.afficher_emp());
+
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("non effectue\n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+}
+
+void Gestion_emp::setFonction_combo()
+{
+
+   QSqlQueryModel * modal=new QSqlQueryModel();
+
+    QSqlQuery query;
+    query.prepare("select nom from fonctions ");
+    query.exec();
+    modal->setQuery(query);
+    ui->fonctionEmp->setModel(modal);
+
+
+
+}
+
+void Gestion_emp::setService_combo()
+{
+
+   QSqlQueryModel * modal=new QSqlQueryModel();
+
+    QSqlQuery query;
+    query.prepare("select nom from services ");
+    query.exec();
+    modal->setQuery(query);
+    ui->serviceEmp->setModel(modal);
+
+}
+
+void Gestion_emp::on_voirEmp_clicked()
+{
+    Employes emp("");
+
+    QString trieOption=ui->trierEmpComboBox->currentText();
+    ui->tableViewEmp->setModel(emp.trierEmployes(trieOption));
+
+    //ui->tableViewEmp->setModel(emp.afficher_emp());
+
+    setFonction_combo();
+    setService_combo();
+
+   // qDebug()<< currentF;
+}
+
+void Gestion_emp::on_supprimerEmp_clicked()
+{
+    int id=ui->idEmpInput->text().toInt();
+
+    Employes emp("");
+    bool test_supprimer = emp.supprimer_emp(id);
+    if(test_supprimer)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" employee successfully deleted\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewEmp->setModel(emp.afficher_emp());
+         ui->idEmpInput->setText("");
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Error deleting employee: employee does not exist\n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+
+}
+
+
+void Gestion_emp::on_setEmp_clicked()
+{
+    int id=ui->idEmpInput->text().toInt();
+    Employes emp("");
+
+    QSqlQuery empInfo = emp.afficherEmp(id);
+    empInfo.next();
+    ui->nomEmp->setText(empInfo.value(1).toString());
+    ui->prenomEmp->setText(empInfo.value(2).toString());
+    ui->emailEmp->setText(empInfo.value(7).toString());
+    ui->passwordEmp->setText(empInfo.value(8).toString());
+
+    //ui->dateN->setDate(empInfo.value(3).toDate());
+    QString date_string_on_db = empInfo.value(3).toString();
+    QDate Date = QDate::fromString(date_string_on_db,"dd/MM/yyyy");
+    ui->dateN->setDate(Date);
+
+    //ui->dateE->setDate(empInfo.value(4).toDate());
+    QString date_string_on_db2 = empInfo.value(4).toString();
+    QDate Date2 = QDate::fromString(date_string_on_db2,"dd/MM/yyyy");
+    ui->dateE->setDate(Date2);
+
+    ui->fonctionEmp->setCurrentText(empInfo.value(6).toString());
+    ui->serviceEmp->setCurrentText(empInfo.value(5).toString());
+}
+
+
+void Gestion_emp::on_modifierEmp_clicked()
+{
+    QString nomEmp=ui->nomEmp->text();
+    QString prenomEmp=ui->prenomEmp->text();
+    QString email=ui->emailEmp->text();
+    QString password=ui->passwordEmp->text();
+    QString dateN=ui->dateN->text();
+    QString dateE=ui->dateE->text();
+
+    QString fonction=ui->fonctionEmp->currentText();
+    QString service=ui->serviceEmp->currentText();
+
+    int id=ui->idEmpInput->text().toInt();
+    Employes emp(nomEmp, prenomEmp, dateN, dateE, service, fonction, email, password);
+    bool test_modifier = emp.updateEmp(id);
+    //ui->idEmpInput->setText("");
+
+    if(test_modifier){
+        QMessageBox::information(nullptr, QObject::tr("update status"),QObject::tr("Employee updated.\nClick Cancel to exit."), QMessageBox::Cancel,QMessageBox::NoIcon);
+        ui->tableViewEmp->setModel(emp.afficher_emp());
+        ui->idEmpInput->setText("");
+    }
+    else {
+        QMessageBox::critical(nullptr, QObject::tr("update status"),QObject::tr("Error updating employee: employee does not exist.\nClick Cancel to exit."), QMessageBox::Cancel);
+    }
+
+}
+
+void Gestion_emp::on_fonctionEmpBtn_clicked()
+{
+    Fonctions_emp *fonction = new Fonctions_emp();
+
+     fonction->show();
+}
+
+void Gestion_emp::on_servicesEmpBtn_clicked()
+{
+    Services_emp *service = new Services_emp();
+
+     service->show();
+}
+
+
+void Gestion_emp::on_salaireEmp_clicked()
+{
+    Employes emp("");
+    int id=ui->idEmpInput->text().toInt();
+
+    //qDebug() << "id" << id ;
+    if (emp.employeExists(id))
+    {
+        Salaires_emp *salaire = new Salaires_emp();
+        salaire->idEmp = id;
+        salaire->fonctionEmp = currentEmp.getCurrentFonction();
+        qDebug() << "fonctionEmp" << salaire->fonctionEmp ;
+
+         salaire->show();
+
+    }
+}
+
+
+void Gestion_emp::on_congeEmp_clicked()
+{
+    Employes emp("");
+    int id=ui->idEmpInput->text().toInt();
+
+    //qDebug() << "id" << id ;
+    if (emp.employeExists(id))
+    {
+        conges_emp *conge = new conges_emp();
+        conge->idEmp = id;
+        conge->fonctionEmp = currentEmp.getCurrentFonction();
+
+         conge->show();
+
+    }
+
+}
+
+void Gestion_emp::on_pdfEmp_clicked()
+{
+    QPdfWriter pdf("C:/Users/color/Desktop/pdf/Liste_Employes.pdf");
+
+           QPainter painter(&pdf);
+           int i = 4100;
+          // const QImage image(":/Resources/emp_img/logo.png");
+                       //const QPoint imageCoordinates(155,0);
+                       //int width1 = 1600;
+                       //int height1 = 1600;
+                       //QImage img=image.scaled(width1,height1);
+                       //painter.drawImage(imageCoordinates, img );
+
+
+                  QColor dateColor(0x4a5bcf);
+                  painter.setPen(dateColor);
+
+                  painter.setFont(QFont("Montserrat SemiBold", 11));
+                  QDate cd = QDate::currentDate();
+                  painter.drawText(8400,250,cd.toString("Tunis"));
+                  painter.drawText(8100,500,cd.toString("dd/MM/yyyy"));
+
+                  QColor titleColor(0x341763);
+                  painter.setPen(titleColor);
+                  painter.setFont(QFont("Montserrat SemiBold", 25));
+
+                  painter.drawText(3000,2700,"Liste des employés");
+
+                  painter.setPen(Qt::black);
+                  painter.setFont(QFont("Time New Roman", 15));
+                  //painter.drawRect(100,100,9400,2500);
+                  painter.drawRect(100,3300,9400,500);
+
+                  painter.setFont(QFont("Montserrat SemiBold", 10));
+
+                  painter.drawText(500,3600,"Nom");
+                  painter.drawText(2000,3600,"Prenom");
+                  painter.drawText(3300,3600,"dateN");
+                  painter.drawText(4500,3600,"dateE");
+                  painter.drawText(5700,3600,"serviceN");
+                  painter.drawText(7500,3600,"fonctionN");
+
+                  painter.setFont(QFont("Montserrat", 10));
+                  painter.drawRect(100,3300,9400,9000);
+
+                  QSqlQuery query;
+                  query.prepare("select * from employess");
+                  query.exec();
+                  int y=4300;
+                  while (query.next())
+                  {
+                      painter.drawLine(100,y,9490,y);
+                      y+=500;
+                      painter.drawText(500,i,query.value(1).toString());
+                      painter.drawText(2000,i,query.value(2).toString());
+                      painter.drawText(3300,i,query.value(3).toString());
+                      painter.drawText(4500,i,query.value(4).toString());
+                      painter.drawText(5700,i,query.value(5).toString());
+                      painter.drawText(7500,i,query.value(6).toString());
+
+                     i = i + 500;
+                  }
+                  QMessageBox::information(this, QObject::tr("PDF Enregistré!"),
+                  QObject::tr("PDF Enregistré!.\n" "Click Cancel to exit."), QMessageBox::Cancel);
+
+}
+
+void Gestion_emp::on_chercherEmp_textChanged(const QString &arg1)
+{
+    QString chaine_c=ui->chercherEmp->text();
+
+    Employes emp("");
+
+    if(chaine_c !="")
+    {
+    ui->tableViewEmp->setModel(emp.rechercherEmployes(chaine_c));
+    }
+    else
+    {
+        QString trieOption=ui->trierEmpComboBox->currentText();
+        ui->tableViewEmp->setModel(emp.trierEmployes(trieOption));
+    }
+
+}
+
+void Gestion_emp::on_trierEmpBtn_clicked()
+{
+
+    Employes emp("");
+
+    QString trieOption=ui->trierEmpComboBox->currentText();
+     ui->tableViewEmp->setModel(emp.trierEmployes(trieOption));
+
+}
+
+void Gestion_emp::on_LogoutBtn_clicked()
+{
+
+    this->close();
+    Login login;
+    login.show();
+    QEventLoop loop;
+
+    connect(&login, SIGNAL(closed()), &loop, SLOT(quit()));
+
+    loop.exec();
+}

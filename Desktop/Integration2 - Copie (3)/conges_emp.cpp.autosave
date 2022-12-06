@@ -1,0 +1,149 @@
+#include "conges_emp.h"
+#include "ui_conges_emp.h"
+#include "employes.h"
+#include "conges.h"
+
+conges_emp::conges_emp(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::conges_emp)
+{
+    ui->setupUi(this);
+
+    QString id_emp = QString::number(idEmp);
+    ui->idEmpLabel->setText(id_emp);
+
+
+     if(fonctionEmp != "admin"){
+         ui->ajouterConge->hide();
+         ui->modifierConge->hide();
+         ui->supprimerConge->hide();
+         ui->setConge->hide();
+         ui->idCongeInput->hide();
+         ui->dateD->hide();
+         ui->dateF->hide();
+     }
+}
+
+conges_emp::~conges_emp()
+{
+    delete ui;
+}
+
+void conges_emp::on_voirConge_clicked()
+{
+   Conges c("");
+
+    ui->tableViewConge->setModel(c.afficher_c(idEmp));
+
+    //qDebug() << "idEmp=" << idEmp ;
+    QString id_emp = QString::number(idEmp);
+    ui->idEmpLabel->setText(id_emp);
+
+    Employes emp("");
+
+    QSqlQuery empInfo = emp.afficherEmp(idEmp);
+    empInfo.next();
+
+    ui->nomEmpLabel->setText(empInfo.value(1).toString());
+    ui->prenomEmpLabel->setText(empInfo.value(2).toString());
+
+    if(fonctionEmp != "admin"){
+        ui->ajouterConge->hide();
+        ui->modifierConge->hide();
+        ui->supprimerConge->hide();
+        ui->setConge->hide();
+        ui->idCongeInput->hide();
+        ui->dateD->hide();
+        ui->dateF->hide();
+   }
+    else{
+        ui->ajouterConge->show();
+        ui->modifierConge->show();
+        ui->supprimerConge->show();
+        ui->setConge->show();
+        ui->idCongeInput->show();
+        ui->dateD->show();
+        ui->dateF->show();
+
+    }
+
+}
+
+void conges_emp::on_ajouterConge_clicked()
+{
+    QString dateDeb=ui->dateD->text();
+    QString dateFin=ui->dateF->text();
+
+    Conges c(dateDeb, dateFin, idEmp);
+    bool test_ajout = c.ajouter_c();
+
+    if(test_ajout)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" effectue\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewConge->setModel(c.afficher_c(idEmp));
+
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Erreur: ajout non effectue! \n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+}
+
+void conges_emp::on_supprimerConge_clicked()
+{
+    int id=ui->idCongeInput->text().toInt();
+
+    Conges c("");
+    bool test_supprimer = c.supprimer_c(id);
+    if(test_supprimer)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" congé successfully deleted\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewConge->setModel(c.afficher_c(idEmp));
+         ui->idCongeInput->setText("");
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Error deleting congé: congé does not exist\n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+}
+
+void conges_emp::on_setConge_clicked()
+{
+    int id=ui->idCongeInput->text().toInt();
+    Conges c("");
+
+    QSqlQuery sInfo = c.afficherC(id);
+    sInfo.next();
+
+    QString date_string_on_db = sInfo.value(1).toString();
+    QDate DateD = QDate::fromString(date_string_on_db,"dd/MM/yyyy");
+    ui->dateD->setDate(DateD);
+
+    QString date_string_on_db2 = sInfo.value(2).toString();
+    QDate DateF = QDate::fromString(date_string_on_db2,"dd/MM/yyyy");
+    ui->dateF->setDate(DateF);
+}
+
+void conges_emp::on_modifierConge_clicked()
+{
+    QString dateDeb=ui->dateD->text();
+    QString dateFin=ui->dateF->text();
+
+    int id=ui->idCongeInput->text().toInt();
+    Conges c(dateDeb, dateFin, idEmp);
+    bool test_modifier = c.updateC(id);
+
+    if(test_modifier){
+        QMessageBox::information(nullptr, QObject::tr("update status"),QObject::tr("congé updated.\nClick Cancel to exit."), QMessageBox::Cancel,QMessageBox::NoIcon);
+        ui->tableViewConge->setModel(c.afficher_c(idEmp));
+        ui->idCongeInput->setText("");
+    }
+    else {
+        QMessageBox::critical(nullptr, QObject::tr("update status"),QObject::tr("Error updating congé: congé does not exist.\nClick Cancel to exit."), QMessageBox::Cancel);
+    }
+
+}

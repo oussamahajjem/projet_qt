@@ -1,0 +1,35 @@
+#ifndef SERVICES_EMP_H
+#define SERVICES_EMP_H
+
+#include <QDialog>
+
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
+
+namespace Ui {
+class Services_emp;
+}
+
+class Services_emp : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit Services_emp(QWidget *parent = nullptr);
+    ~Services_emp();
+
+private slots:
+    void on_ajouterS_clicked();
+
+    void on_supprimerS_clicked();
+
+    void on_setS_clicked();
+
+    void on_modifierS_clicked();
+
+private:
+    Ui::Services_emp *ui;
+};
+
+#endif // SERVICES_EMP_H

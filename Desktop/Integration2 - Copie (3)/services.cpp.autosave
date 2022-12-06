@@ -1,0 +1,106 @@
+#include "services.h"
+
+Services::Services()
+{
+
+}
+
+Services::Services(QString nom, int RTT)
+{
+    this->nom = nom;
+    this->RTT = RTT;
+}
+
+
+bool Services::ajouter_s()
+{
+    QSqlQuery query;
+
+    query.prepare("Insert into services(nom, RTT)"
+                  "Values( :nom, :RTT)");
+    query.bindValue(":nom", nom);
+    query.bindValue(":RTT", RTT);
+
+    return query.exec();
+}
+
+QSqlQueryModel * Services::afficher_s()
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * from services ");
+
+    return model ;
+}
+
+bool Services::serviceExists(int idS)
+{
+    bool exists = false;
+
+    QSqlQuery checkQuery;
+    checkQuery.prepare("SELECT idService FROM services WHERE idService =:idService ");
+    checkQuery.bindValue(":idService", idS);
+
+    if (checkQuery.exec())
+    {
+        if (checkQuery.next())
+        {
+            exists = true;
+        }
+    }
+    else
+    {
+        //qDebug() << "Service not found";
+    }
+
+    return exists;
+}
+
+bool Services::supprimer_s(int id)
+{
+
+    bool success = false;
+
+    QSqlQuery query;
+
+    if (serviceExists(id))
+    {
+        query.prepare("Delete from services where idService=:idService");
+        query.bindValue(":idService",id);
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+QSqlQuery Services::afficherS(int idS)
+{
+    QSqlQuery query;
+    query.prepare("select * from services where idService=:idService");
+    query.bindValue(":idService",idS);
+
+    query.exec();
+    return query;
+}
+
+
+bool Services::updateS(int idS)
+{
+    bool success = false;
+
+    QSqlQuery query;
+    if (serviceExists(idS))
+    {
+        query.prepare("update services set nom=:nom, RTT=:RTT where idService=:idService");
+        query.bindValue(":nom",nom);
+        query.bindValue(":RTT",RTT);
+        query.bindValue(":idService",idS);
+
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+

@@ -1,0 +1,73 @@
+#ifndef GESTION_EMP_H
+#define GESTION_EMP_H
+
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include "employes.h"
+#include "login.h"
+#include <QtSql/QSqlQuery>
+
+
+namespace Ui {
+class Gestion_emp;
+}
+
+class Gestion_emp : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit Gestion_emp(QWidget *parent = nullptr);
+    ~Gestion_emp();
+
+
+
+
+
+private slots:
+    void on_ajouterEmp_clicked();
+    void setFonction_combo();
+    void setService_combo();
+
+    void on_voirEmp_clicked();
+
+    void on_supprimerEmp_clicked();
+
+    void on_setEmp_clicked();
+
+    void on_modifierEmp_clicked();
+
+    void on_fonctionEmpBtn_clicked();
+
+    void on_servicesEmpBtn_clicked();
+
+    void on_salaireEmp_clicked();
+
+
+    void on_congeEmp_clicked();
+
+    void on_pdfEmp_clicked();
+
+    void on_chercherEmp_textChanged(const QString &arg1);
+
+    void on_trierEmpBtn_clicked();
+
+    void on_LogoutBtn_clicked();
+
+private:
+    Ui::Gestion_emp *ui;
+
+    int currentId;
+    QString currentNom;
+    QString currentPrenom;
+    QString currentDateN;
+    QString currentDateE;
+    QString currentService;
+    QString currentFonction;
+    QString currentEmail;
+    QString currentPassword;
+
+};
+
+#endif // GESTION_EMP_H

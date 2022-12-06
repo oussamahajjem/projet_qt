@@ -1,0 +1,34 @@
+#ifndef FONCTIONS_EMP_H
+#define FONCTIONS_EMP_H
+
+#include <QDialog>
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
+
+namespace Ui {
+class Fonctions_emp;
+}
+
+class Fonctions_emp : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit Fonctions_emp(QWidget *parent = nullptr);
+    ~Fonctions_emp();
+
+private slots:
+    void on_ajouterF_clicked();
+
+    void on_modifierF_clicked();
+
+    void on_supprimerF_clicked();
+
+    void on_setF_clicked();
+
+private:
+    Ui::Fonctions_emp *ui;
+};
+
+#endif // FONCTIONS_EMP_H

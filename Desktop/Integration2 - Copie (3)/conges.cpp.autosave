@@ -1,0 +1,115 @@
+#include "conges.h"
+
+Conges::Conges(QString dateDEb)
+{
+    this->dateDeb = dateDEb;
+}
+
+Conges::Conges(QString dateDEb, QString dateFin, int idEmp)
+{
+    this->dateDeb = dateDEb;
+    this->dateFin = dateFin;
+    this->idEmp = idEmp;
+}
+
+
+bool Conges::ajouter_c()
+{
+    QSqlQuery query;
+
+    query.prepare("Insert into conge(dateDEb, dateFin, idEmp)"
+                  "Values( :dateDeb, :dateFin, :idEmp)");
+    query.bindValue(":dateDeb", dateDeb);
+    query.bindValue(":dateFin", dateFin);
+    query.bindValue(":idEmp", idEmp);
+
+    return query.exec();
+}
+
+QSqlQueryModel * Conges::afficher_c(int idEmp)
+{
+    QString id_emp = QString::number(idEmp);
+
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * from conge where(idEmp='"+id_emp+"')  ") ;
+
+    return model ;
+}
+
+bool Conges::congeExists(int idC)
+{
+    bool exists = false;
+
+    QSqlQuery checkQuery;
+    checkQuery.prepare("SELECT idC FROM conge WHERE idC =:idC ");
+    checkQuery.bindValue(":idC", idC);
+
+    if (checkQuery.exec())
+    {
+        if (checkQuery.next())
+        {
+            exists = true;
+        }
+    }
+    else
+    {
+        //qDebug() << "conge not found";
+    }
+
+    return exists;
+}
+
+bool Conges::supprimer_c(int id)
+{
+
+    bool success = false;
+
+    QSqlQuery query;
+
+    if (congeExists(id))
+    {
+        query.prepare("Delete from conge where idC=:idC ");
+        query.bindValue(":idC",id);
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+QSqlQuery Conges::afficherC(int idC)
+{
+    QSqlQuery query;
+    query.prepare("select * from conge where idC=:idC");
+    query.bindValue(":idC",idC);
+
+    query.exec();
+    return query;
+}
+
+
+bool Conges::updateC(int idC)
+{
+    bool success = false;
+
+    QSqlQuery query;
+    if (congeExists(idC))
+    {
+        query.prepare("update conge set dateDeb=:dateDeb, dateFin=:dateFin, idEmp=:idEmp where idC=:idC");
+        query.bindValue(":dateDeb", dateDeb);
+        query.bindValue(":dateFin", dateFin);
+        query.bindValue(":idEmp", idEmp);
+        query.bindValue(":idC",idC);
+
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+
+
+

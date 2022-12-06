@@ -1,0 +1,168 @@
+#include "salaires_emp.h"
+#include "ui_salaires_emp.h"
+#include "salaires.h"
+#include "employes.h"
+
+#include <QtDebug>
+
+
+Salaires_emp::Salaires_emp(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Salaires_emp)
+{
+    ui->setupUi(this);
+
+    Salaires s("");
+    ui->tableViewSalaire->setModel(s.afficher_s(idEmp));
+    on_voirSalaire_clicked();
+
+}
+
+
+Salaires_emp::~Salaires_emp()
+{
+    delete ui;
+}
+
+void Salaires_emp::on_ajouterSalaire_clicked()
+{
+    QString dateDeb=ui->dateD->text();
+    QString dateFin=ui->dateF->text();
+    int chargeP=ui->chargeP->text().toInt();
+    int chargeS=ui->chargeS->text().toInt();
+    int brut=ui->brut->text().toInt();
+    //int idEmp=ui->idEmpLabel->text().toInt();
+
+
+    Salaires s(dateDeb, dateFin, chargeP, chargeS, brut, idEmp);
+    bool test_ajout = s.ajouter_s();
+
+    if(test_ajout)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" effectue\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewSalaire->setModel(s.afficher_s(idEmp));
+
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Erreur: ajout non effectue! \n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+
+}
+
+void Salaires_emp::on_supprimerSalaire_clicked()
+{
+
+    int id=ui->idSalaireInput->text().toInt();
+
+    Salaires s("");
+    bool test_supprimer = s.supprimer_s(id);
+    if(test_supprimer)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" salaire successfully deleted\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewSalaire->setModel(s.afficher_s(idEmp));
+         ui->idSalaireInput->setText("");
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Error deleting salaire: salaire does not exist\n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+}
+
+void Salaires_emp::on_setSalaire_clicked()
+{
+    int id=ui->idSalaireInput->text().toInt();
+    Salaires s("");
+
+    QSqlQuery sInfo = s.afficherS(id);
+    sInfo.next();
+
+    QString date_string_on_db = sInfo.value(1).toString();
+    QDate DateD = QDate::fromString(date_string_on_db,"dd/MM/yyyy");
+    ui->dateD->setDate(DateD);
+
+    QString date_string_on_db2 = sInfo.value(2).toString();
+    QDate DateF = QDate::fromString(date_string_on_db2,"dd/MM/yyyy");
+    ui->dateF->setDate(DateF);
+
+    ui->chargeP->setText(sInfo.value(3).toString());
+    ui->chargeS->setText(sInfo.value(4).toString());
+    ui->brut->setText(sInfo.value(5).toString());
+}
+
+void Salaires_emp::on_modifierSalaire_clicked()
+{
+    QString dateDeb=ui->dateD->text();
+    QString dateFin=ui->dateF->text();
+    int chargeP=ui->chargeP->text().toInt();
+    int chargeS=ui->chargeS->text().toInt();
+    int brut=ui->brut->text().toInt();
+
+    int id=ui->idSalaireInput->text().toInt();
+    Salaires s(dateDeb, dateFin, chargeP, chargeS, brut, idEmp);
+    bool test_modifier = s.updateS(id);
+
+    if(test_modifier){
+        QMessageBox::information(nullptr, QObject::tr("update status"),QObject::tr("salaire updated.\nClick Cancel to exit."), QMessageBox::Cancel,QMessageBox::NoIcon);
+        ui->tableViewSalaire->setModel(s.afficher_s(idEmp));
+        ui->idSalaireInput->setText("");
+    }
+    else {
+        QMessageBox::critical(nullptr, QObject::tr("update status"),QObject::tr("Error updating Salaire: salaire does not exist.\nClick Cancel to exit."), QMessageBox::Cancel);
+    }
+
+
+
+}
+
+void Salaires_emp::on_voirSalaire_clicked()
+{
+    Salaires s("");
+
+    ui->tableViewSalaire->setModel(s.afficher_s(idEmp));
+
+    //qDebug() << "idEmp=" << idEmp ;
+    QString id_emp = QString::number(idEmp);
+    ui->idEmpLabel->setText(id_emp);
+
+    Employes emp("");
+
+    QSqlQuery empInfo = emp.afficherEmp(idEmp);
+    empInfo.next();
+
+    ui->nomEmpLabel->setText(empInfo.value(1).toString());
+    ui->prenomEmpLabel->setText(empInfo.value(2).toString());
+
+
+     if(fonctionEmp != "admin"){
+        ui->ajouterSalaire->hide();
+        ui->modifierSalaire->hide();
+        ui->supprimerSalaire->hide();
+        ui->setSalaire->hide();
+        ui->idSalaireInput->hide();
+        ui->dateD->hide();
+        ui->dateF->hide();
+        ui->chargeP->hide();
+        ui->chargeS->hide();
+        ui->brut->hide();
+    }
+     else{
+         ui->ajouterSalaire->show();
+         ui->modifierSalaire->show();
+         ui->supprimerSalaire->show();
+         ui->setSalaire->show();
+         ui->idSalaireInput->show();
+         ui->dateD->show();
+         ui->dateF->show();
+         ui->chargeP->show();
+         ui->chargeS->show();
+         ui->brut->show();
+
+     }
+
+
+}

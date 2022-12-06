@@ -1,0 +1,32 @@
+#ifndef CONGES_H
+#define CONGES_H
+
+#include <QString>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QVBoxLayout>
+#include <QDateEdit>
+#include <QDate>
+#include <QtDebug>
+
+class Conges
+{
+    int idC;
+    QString dateDeb;
+    QString dateFin;
+    int idEmp;
+public:
+    Conges();
+    Conges(QString dateDeb);
+    Conges(QString dateDeb, QString dateFin, int idEmp);
+
+    bool ajouter_c();
+
+    QSqlQueryModel *afficher_c(int idEmp);
+    bool congeExists(int idC);
+    bool supprimer_c(int id);
+    QSqlQuery afficherC(int idC);
+    bool updateC(int idC);
+};
+
+#endif // CONGES_H

@@ -1,0 +1,26 @@
+#ifndef FONCTIONS_H
+#define FONCTIONS_H
+
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QVBoxLayout>
+
+class Fonctions
+{
+    int idF;
+    QString nom;
+    int RTT;
+public:
+    Fonctions();
+    Fonctions(QString nom, int RTT);
+
+    bool ajouter_f();
+
+    QSqlQueryModel *afficher_f();
+    bool fonctionExists(int idF);
+    bool supprimer_f(int id);
+    QSqlQuery afficherF(int idF);
+    bool updateF(int idF);
+};
+
+#endif // FONCTIONS_H

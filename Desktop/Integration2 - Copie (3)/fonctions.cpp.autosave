@@ -1,0 +1,105 @@
+#include "fonctions.h"
+
+Fonctions::Fonctions()
+{
+
+}
+
+Fonctions::Fonctions(QString nom, int RTT)
+{
+    this->nom = nom;
+    this->RTT = RTT;
+}
+
+bool Fonctions::ajouter_f()
+{
+    QSqlQuery query;
+
+    query.prepare("Insert into fonctions(nom, RTT)"
+                  "Values( :nom, :RTT)");
+    query.bindValue(":nom", nom);
+    query.bindValue(":RTT", RTT);
+
+    return query.exec();
+}
+
+QSqlQueryModel * Fonctions::afficher_f()
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * from fonctions ");
+
+    return model ;
+}
+
+bool Fonctions::fonctionExists(int idF)
+{
+    bool exists = false;
+
+    QSqlQuery checkQuery;
+    checkQuery.prepare("SELECT idF FROM fonctions WHERE idF =:idF ");
+    checkQuery.bindValue(":idF", idF);
+
+    if (checkQuery.exec())
+    {
+        if (checkQuery.next())
+        {
+            exists = true;
+        }
+    }
+    else
+    {
+        //qDebug() << "Employee not found";
+    }
+
+    return exists;
+}
+
+bool Fonctions::supprimer_f(int id)
+{
+
+    bool success = false;
+
+    QSqlQuery query;
+
+    if (fonctionExists(id))
+    {
+        query.prepare("Delete from fonctions where idF=:idF");
+        query.bindValue(":idF",id);
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+QSqlQuery Fonctions::afficherF(int idF)
+{
+    QSqlQuery query;
+    query.prepare("select * from fonctions where idF=:idF");
+    query.bindValue(":idF",idF);
+
+    query.exec();
+    return query;
+}
+
+
+bool Fonctions::updateF(int idF)
+{
+    bool success = false;
+
+    QSqlQuery query;
+    if (fonctionExists(idF))
+    {
+        query.prepare("update fonctions set nom=:nom, RTT=:RTT where idF=:idF");
+        query.bindValue(":nom",nom);
+        query.bindValue(":RTT",RTT);
+        query.bindValue(":idF",idF);
+
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+

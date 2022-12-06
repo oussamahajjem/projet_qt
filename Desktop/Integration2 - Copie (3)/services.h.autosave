@@ -1,0 +1,27 @@
+#ifndef SERVICES_H
+#define SERVICES_H
+
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QVBoxLayout>
+
+class Services
+{
+    int idService;
+    QString nom;
+    int RTT;
+
+public:
+    Services();
+    Services(QString nom, int RTT);
+
+    bool ajouter_s();
+
+    QSqlQueryModel *afficher_s();
+    bool serviceExists(int idS);
+    bool supprimer_s(int id);
+    QSqlQuery afficherS(int idS);
+    bool updateS(int idS);
+};
+
+#endif // SERVICES_H

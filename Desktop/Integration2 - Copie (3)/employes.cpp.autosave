@@ -1,0 +1,209 @@
+#include "employes.h"
+
+Employes::Employes()
+{
+
+}
+
+Employes::Employes(QString nomEmp)
+{
+    this->nomEmp = nomEmp;
+}
+
+Employes::Employes(QString nomEmp, QString prenomEmp, QString dateN, QString dateE, QString serviceN, QString fonctionN, QString email, QString password)
+{
+    this->nomEmp = nomEmp;
+    this->prenomEmp = prenomEmp;
+    this->dateN = dateN;
+    this->dateE = dateE;
+    this->serviceN = serviceN;
+    this->fonctionN = fonctionN;
+    this->email = email;
+    this->password = password;
+}
+
+bool Employes::ajouter_emp()
+{
+    QSqlQuery query;
+
+    query.prepare("Insert into employess(nomEmp, prenomEmp, dateN, dateE, serviceN, fonctionN, email, password)"
+                  "Values( :nomEmp, :prenomEmp, :dateN, :dateE, :serviceN, :fonctionN, :email, :password)");
+    query.bindValue(":nomEmp", nomEmp);
+    query.bindValue(":prenomEmp", prenomEmp);
+    query.bindValue(":dateN", dateN);
+    query.bindValue(":dateE", dateE);
+    query.bindValue(":serviceN", serviceN);
+    query.bindValue(":fonctionN", fonctionN);
+    query.bindValue(":email", email);
+    query.bindValue(":password", password);
+
+    return query.exec();
+}
+
+QSqlQueryModel * Employes::afficher_emp()
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * from employess ");
+
+    //model->setHeaderData(0, Qt::Horizontal, QObject::tr("IDEmp"));
+    //model->setHeaderData(1, Qt::Horizontal, QObject::tr("NomEmp"));
+    //model->setHeaderData(2, Qt::Horizontal, QObject::tr("PrenomEmp"));
+    //model->setHeaderData(3, Qt::Horizontal, QObject::tr("DateN"));
+    //model->setHeaderData(4, Qt::Horizontal, QObject::tr("DateE"));
+
+    return model ;
+}
+
+bool Employes::employeExists(int idEmp)
+{
+    bool exists = false;
+
+    QSqlQuery checkQuery;
+    checkQuery.prepare("SELECT idEmp FROM employess WHERE idEmp =:idEmp ");
+    checkQuery.bindValue(":idEmp", idEmp);
+
+    if (checkQuery.exec())
+    {
+        if (checkQuery.next())
+        {
+            exists = true;
+        }
+    }
+    else
+    {
+        //qDebug() << "Employee not found";
+    }
+
+    return exists;
+}
+
+
+bool Employes::supprimer_emp(int id)
+{
+
+    bool success = false;
+
+    QSqlQuery query;
+
+    if (employeExists(id))
+    {
+        query.prepare("Delete from employess where idEmp=:idEmp");
+        query.bindValue(":idEmp",id);
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+QSqlQuery Employes::afficherEmp(int idEmp)
+{
+    QSqlQuery query;
+    query.prepare("select * from employess where idEmp=:idEmp ");
+    query.bindValue(":idEmp",idEmp);
+
+    query.exec();
+    return query;
+}
+
+bool Employes::updateEmp(int idEmp)
+{
+    bool success = false;
+
+    QSqlQuery query;
+    if (employeExists(idEmp))
+    {
+        query.prepare("update employess set nomEmp=:nomEmp, prenomEmp=:prenomEmp, dateN=:dateN, dateE=:dateE, serviceN=:serviceN, fonctionN=:fonctionN, email=:email, password=:password where idEmp=:idEmp");
+        query.bindValue(":nomEmp",nomEmp);
+        query.bindValue(":prenomEmp",prenomEmp);
+        query.bindValue(":dateN",dateN);
+        query.bindValue(":dateE",dateE);
+        query.bindValue(":serviceN",serviceN);
+        query.bindValue(":fonctionN",fonctionN);
+        query.bindValue(":email",email);
+        query.bindValue(":password",password);
+        query.bindValue(":idEmp",idEmp);
+
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+//**************************trie*******************************************
+QSqlQueryModel * Employes::trierEmployes(QString test)
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    if(test == "par défaut"){
+        model->setQuery("SELECT * from employess");
+    }
+    else if(test =="nom")
+    {
+        model->setQuery("SELECT * from employess order by nomEmp asc ");
+    }
+    else if(test =="dateN")
+    {
+        model->setQuery("SELECT * from employess order by dateN desc ");
+    }
+    else if(test =="prenom")
+    {
+        model->setQuery("SELECT * from employess order by prenomEmp asc ");
+    }
+    else if(test =="dateE")
+    {
+        model->setQuery("SELECT * from employess order by dateE desc ");
+    }
+    else if(test =="serviceN")
+    {
+        model->setQuery("SELECT * from employess order by serviceN asc ");
+    }
+    else if(test =="fonctionN")
+    {
+        model->setQuery("SELECT * from employess order by fonctionN asc ");
+    }
+    return model;
+}
+
+
+//**************************recherche*****************************
+QSqlQueryModel * Employes::rechercherEmployes(QString chaine)
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * from employess where ( nomEmp LIKE'%"+chaine+"%' OR prenomEmp LIKE'%"+chaine+"%' OR serviceN LIKE'%"+chaine+"%' OR fonctionN LIKE'%"+chaine+"%' OR email LIKE'%"+chaine+"%') ");
+
+
+    return model ;
+}
+
+//*******************authetification********************
+bool Employes::authEmp()
+{
+    bool test = false;
+    QSqlQuery query;
+    query.prepare("select * from employess where email=:email");
+    query.bindValue(":email",email);
+    if(query.exec()){
+        query.next();
+        if(query.value(8).toString() == password){
+             test = true;
+        }else {
+             test = false;
+        }
+    }else {
+        test = false;
+    }
+
+    return test;
+}
+//*********************************
+QSqlQuery Employes::afficherEmp(QString email)
+{
+    QSqlQuery query;
+    query.prepare("select * from employess where email=:email ");
+    query.bindValue(":email",email);
+
+    query.exec();
+    return query;
+}

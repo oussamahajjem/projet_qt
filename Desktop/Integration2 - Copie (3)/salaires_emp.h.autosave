@@ -1,0 +1,40 @@
+#ifndef SALAIRES_EMP_H
+#define SALAIRES_EMP_H
+
+#include <QDialog>
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QtDebug>
+
+namespace Ui {
+class Salaires_emp;
+}
+
+class Salaires_emp : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit Salaires_emp(QWidget *parent = nullptr);
+    ~Salaires_emp();
+
+    int idEmp=0;
+    QString  fonctionEmp;
+
+private slots:
+    void on_ajouterSalaire_clicked();
+
+    void on_supprimerSalaire_clicked();
+
+    void on_setSalaire_clicked();
+
+    void on_modifierSalaire_clicked();
+
+    void on_voirSalaire_clicked();
+
+private:
+    Ui::Salaires_emp *ui;
+};
+
+#endif // SALAIRES_EMP_H

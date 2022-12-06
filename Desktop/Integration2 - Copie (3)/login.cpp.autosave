@@ -1,0 +1,61 @@
+#include "login.h"
+#include "ui_login.h"
+#include "gestion_emp.h"
+#include <QDebug>
+#include <QMessageBox>
+#include "employes.h"
+
+Login::Login(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Login)
+{
+    ui->setupUi(this);
+}
+
+Login::~Login()
+{
+    delete ui;
+}
+
+void Login::on_LoginBtn_clicked()
+{
+    QString email = ui->emailEmp->text();
+    QString password = ui->passwordEmp->text();
+
+    if(email == "" && password == ""){
+        QMessageBox::critical(nullptr, QObject::tr("login status"),QObject::tr("please fill the email and password input.\nClick Cancel to exit."), QMessageBox::Cancel);
+    }else {
+        Employes e("", "", "", "", "", "", email, password);
+        if(e.authEmp()){
+            QSqlQuery emp = e.afficherEmp(email.toLower());
+            emp.next();
+            //qDebug()<< emp.value(0).toString();
+
+            Employes em(emp.value(1).toString(),emp.value(2).toString(), emp.value(3).toString(), emp.value(4).toString(), emp.value(5).toString() ,emp.value(6).toString() ,emp.value(7).toString(), emp.value(8).toString());
+
+            //currentId = emp.value(0).toString();
+            currentEmp = em;
+            currentEmp.setCurrentId(emp.value(0).toInt());
+            qDebug()<< currentEmp.getCurrentId();
+
+            this->close();
+            Gestion_emp gEmp;
+            gEmp.show();
+            QEventLoop loop;
+
+            connect(&gEmp, SIGNAL(closed()), &loop, SLOT(quit()));
+
+            loop.exec();
+
+        }else {
+                    QMessageBox::critical(nullptr, QObject::tr("login status"),QObject::tr("email or password are incorrect.\nClick Cancel to exit."), QMessageBox::Cancel);
+                }
+
+
+            }
+
+
+
+
+
+}

@@ -1,0 +1,96 @@
+#include "fonctions_emp.h"
+#include "fonctions.h"
+#include "ui_fonctions_emp.h"
+
+Fonctions_emp::Fonctions_emp(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Fonctions_emp)
+{
+    ui->setupUi(this);
+
+    Fonctions f("", 0);
+    ui->tableViewF->setModel(f.afficher_f());
+}
+
+Fonctions_emp::~Fonctions_emp()
+{
+    delete ui;
+}
+
+void Fonctions_emp::on_ajouterF_clicked()
+{
+    QString nomF=ui->nomF->text();
+    int RTT=ui->rttF->text().toInt();
+
+    Fonctions f(nomF, RTT);
+    bool test_ajout = f.ajouter_f();
+
+    if(test_ajout)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" effectue\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewF->setModel(f.afficher_f());
+
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Erreur: nom fonction existe déjà! \n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+}
+
+void Fonctions_emp::on_supprimerF_clicked()
+{
+    int id=ui->idFinput->text().toInt();
+
+    Fonctions f("",0);
+    bool test_supprimer = f.supprimer_f(id);
+    if(test_supprimer)
+    {
+        QMessageBox::information(nullptr,QObject::tr("ok"),
+                               QObject::tr(" function successfully deleted\n"
+                                           "click cancel to exit."),QMessageBox::Cancel);
+         ui->tableViewF->setModel(f.afficher_f());
+         ui->idFinput->setText("");
+    }
+    else  QMessageBox::critical(nullptr,QObject::tr("Not ok"),
+                                   QObject::tr("Error deleting function: function does not exist\n"
+                                               "click cancel to exit."),QMessageBox::Cancel);
+
+
+}
+
+void Fonctions_emp::on_setF_clicked()
+{
+    int id=ui->idFinput->text().toInt();
+    Fonctions f("", 0);
+
+    QSqlQuery fInfo = f.afficherF(id);
+    fInfo.next();
+    ui->nomF->setText(fInfo.value(1).toString());
+    ui->rttF->setText(fInfo.value(2).toString());
+
+}
+
+
+void Fonctions_emp::on_modifierF_clicked()
+{
+    QString nomF=ui->nomF->text();
+    int RTT=ui->rttF->text().toInt();
+
+    int id=ui->idFinput->text().toInt();
+    Fonctions f(nomF, RTT);
+    bool test_modifier = f.updateF(id);
+
+    if(test_modifier){
+        QMessageBox::information(nullptr, QObject::tr("update status"),QObject::tr("function updated.\nClick Cancel to exit."), QMessageBox::Cancel,QMessageBox::NoIcon);
+        ui->tableViewF->setModel(f.afficher_f());
+        ui->idFinput->setText("");
+    }
+    else {
+        QMessageBox::critical(nullptr, QObject::tr("update status"),QObject::tr("Error updating Function: Function does not exist.\nClick Cancel to exit."), QMessageBox::Cancel);
+    }
+
+
+}
+

@@ -1,0 +1,35 @@
+#ifndef SALAIRES_H
+#define SALAIRES_H
+
+#include <QString>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QVBoxLayout>
+#include <QDateEdit>
+#include <QDate>
+#include <QtDebug>
+
+class Salaires
+{
+    int idS;
+    QString dateDeb;
+    QString dateFin;
+    int chargeP;
+    int chargeS;
+    int brut;
+    int idEmp;
+public:
+    Salaires();
+    Salaires(QString dateDEb);
+    Salaires(QString dateDEb, QString dateFin, int chargeP, int chargeS, int brut, int idEmp);
+
+    bool ajouter_s();
+
+    QSqlQueryModel *afficher_s(int idEmp);
+    bool salaireExists(int idS);
+    bool supprimer_s(int id);
+    QSqlQuery afficherS(int idS);
+    bool updateS(int idS);
+};
+
+#endif // SALAIRES_H

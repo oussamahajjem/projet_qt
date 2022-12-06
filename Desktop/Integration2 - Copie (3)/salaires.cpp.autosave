@@ -1,0 +1,121 @@
+#include "salaires.h"
+
+Salaires::Salaires(QString dateDEb)
+{
+    this->dateDeb = dateDEb;
+}
+
+Salaires::Salaires(QString dateDEb, QString dateFin, int chargeP, int chargeS, int brut, int idEmp)
+{
+    this->dateDeb = dateDEb;
+    this->dateFin = dateFin;
+    this->chargeP = chargeP;
+    this->chargeS = chargeS;
+    this->brut = brut;
+    this->idEmp = idEmp;
+}
+
+
+bool Salaires::ajouter_s()
+{
+    QSqlQuery query;
+
+    query.prepare("Insert into salaire(dateDEb, dateFin, chargeP, chargeS, brut, idEmp)"
+                  "Values( :dateDeb, :dateFin, :chargeP, :chargeS, :brut, :idEmp)");
+    query.bindValue(":dateDeb", dateDeb);
+    query.bindValue(":dateFin", dateFin);
+    query.bindValue(":chargeP", chargeP);
+    query.bindValue(":chargeS", chargeS);
+    query.bindValue(":brut", brut);
+    query.bindValue(":idEmp", idEmp);
+
+    return query.exec();
+}
+
+QSqlQueryModel * Salaires::afficher_s(int idEmp)
+{
+    QString id_emp = QString::number(idEmp);
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * from salaire where(idEmp='"+id_emp+"')  ") ;
+
+    return model ;
+}
+
+bool Salaires::salaireExists(int idS)
+{
+    bool exists = false;
+
+    QSqlQuery checkQuery;
+    checkQuery.prepare("SELECT idS FROM salaire WHERE idS =:idS ");
+    checkQuery.bindValue(":idS", idS);
+
+    if (checkQuery.exec())
+    {
+        if (checkQuery.next())
+        {
+            exists = true;
+        }
+    }
+    else
+    {
+        //qDebug() << "Salaire not found";
+    }
+
+    return exists;
+}
+
+bool Salaires::supprimer_s(int id)
+{
+
+    bool success = false;
+
+    QSqlQuery query;
+
+    if (salaireExists(id))
+    {
+        query.prepare("Delete from Salaire where idS=:idS ");
+        query.bindValue(":idS",id);
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+QSqlQuery Salaires::afficherS(int idS)
+{
+    QSqlQuery query;
+    query.prepare("select * from Salaire where idS=:idS");
+    query.bindValue(":idS",idS);
+
+    query.exec();
+    return query;
+}
+
+
+bool Salaires::updateS(int idS)
+{
+    bool success = false;
+
+    QSqlQuery query;
+    if (salaireExists(idS))
+    {
+        query.prepare("update salaire set dateDeb=:dateDeb, dateFin=:dateFin, chargeP=:chargeP, chargeS=:chargeS, brut=:brut, idEmp=:idEmp where idS=:idS");
+        query.bindValue(":dateDeb", dateDeb);
+        query.bindValue(":dateFin", dateFin);
+        query.bindValue(":chargeP", chargeP);
+        query.bindValue(":chargeS", chargeS);
+        query.bindValue(":brut", brut);
+        query.bindValue(":idEmp", idEmp);
+        query.bindValue(":idS",idS);
+
+        success = query.exec();
+    }
+
+        return success ;
+
+}
+
+
+

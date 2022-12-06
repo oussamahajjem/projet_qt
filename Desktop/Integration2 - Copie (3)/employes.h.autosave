@@ -1,0 +1,87 @@
+#ifndef EMPLOYES_H
+#define EMPLOYES_H
+
+#include <QString>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QVBoxLayout>
+#include <QDateEdit>
+#include <QDate>
+#include <QtDebug>
+
+class Employes
+{
+    int id_em;
+    QString nomEmp;
+    QString prenomEmp;
+    QString dateN;
+    QString dateE;
+    QString serviceN;
+    QString fonctionN;
+    QString email;
+    QString password;
+
+public:
+    Employes();
+    Employes(QString nomEmp);
+    Employes(QString nomEmp, QString prenomEmp, QString dateN, QString dateE, QString serviceN, QString fonctionN, QString email, QString password);
+
+    bool ajouter_emp();
+
+    QSqlQueryModel *afficher_emp();
+    bool employeExists(int idEmp);
+    bool supprimer_emp(int id);
+    QSqlQuery afficherEmp(int id_em);
+    bool updateEmp(int idEmp);
+
+    QSqlQueryModel *rechercherEmployes(QString chaine);
+    QSqlQueryModel *trierEmployes(QString test);
+    bool authEmp();
+    QSqlQuery afficherEmp(QString email);
+
+
+
+    int getCurrentId(){
+        return  id_em;
+    }
+
+    void setCurrentId(int id){
+        this->id_em = id;
+    }
+
+    QString getCurrentNom(){
+        return  nomEmp;
+    }
+
+    QString getCurrentPrenom(){
+        return  prenomEmp;
+    }
+
+    QString getCurrentDateN(){
+        return  dateN;
+    }
+
+    QString getCurrentDateE(){
+        return  dateE;
+    }
+
+    QString getCurrentService(){
+        return  serviceN;
+    }
+
+    QString getCurrentFonction(){
+        return  fonctionN;
+    }
+
+    QString getCurrentEmail(){
+        return  email;
+    }
+
+    QString getCurrentPassword(){
+        return  password;
+    }
+
+
+};
+
+#endif // EMPLOYES_H
