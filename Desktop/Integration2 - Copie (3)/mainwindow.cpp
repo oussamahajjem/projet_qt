@@ -867,3 +867,13 @@ void MainWindow::on_pushButton_11_clicked()
                                           "click cancel to exit."),QMessageBox::Cancel);
     }
 }
+
+void MainWindow::on_pushButton_deconnexion_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
